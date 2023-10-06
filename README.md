@@ -15,3 +15,13 @@ When it comes to the dataset, the starting point will look different for the two
 ### Contributions of Each Team Member:
 - Matthew Carbonaro: few-shot learning and dataset creation
 - Luke Braby: introduction paragraphs and traditional techniques
+
+## Part 2: Datasets
+For this step of the process, we each captured 12 pictures of Catan game board and labeled each piece within the image (settlements, cities, roads, and tiles). 
+- Source: our iPhone cameras
+- Training vs Validation Datasets: The training dataset images do not necessarly depict a valid game state and often have more pieces than an average game would. The validation dataset consists of images of typical game states.
+- Number of Objects: each image has 19 tiles, and roughly 14 cities, 16 settlements, and 54 roads. 
+- Characteristics of Samples: Our images are taken from different angles and lightings to make the end model more general.
+### Contributions of Each Team Member:
+- Matthew Carbonaro: 12 photos with labels and collaborated on report
+- Luke Braby: 12 photos with labels and collaborated on report
