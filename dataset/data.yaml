@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 12
+names: ['blue-city', 'blue-road', 'blue-settlement', 'orange-city', 'orange-road', 'orange-settlement', 'red-city', 'red-road', 'red-settlement', 'white-city', 'white-road', 'white-settlement']
+
+roboflow:
+  workspace: university-of-notre-dame-computer-vision
+  project: catan-scorer
+  version: 2
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/university-of-notre-dame-computer-vision/catan-scorer/dataset/2
