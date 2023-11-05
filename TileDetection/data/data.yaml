@@ -1,0 +1,13 @@
+train: C:\Users\lbrab\OneDrive\Documents\Programming\ComputerVisionFA23\SettlersEye\TileDetection\data\train
+val: C:\Users\lbrab\OneDrive\Documents\Programming\ComputerVisionFA23\SettlersEye\TileDetection\data\valid
+test: C:\Users\lbrab\OneDrive\Documents\Programming\ComputerVisionFA23\SettlersEye\TileDetection\data\test
+
+nc: 1
+names: ['tile']
+
+roboflow:
+  workspace: luke-braby-g3udu
+  project: catan-tiles
+  version: 1
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/luke-braby-g3udu/catan-tiles/dataset/1
