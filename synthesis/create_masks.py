@@ -73,7 +73,11 @@ def main():
     args = parser.parse_args()
     if args.filename:
         path = os.path.abspath(args.filename)
-        create_mask(path)
+
+        try:
+            create_mask(path)
+        except Exception as e:
+            print(f"Failed to process {path}. Reason: {e}")
     else:
         root = os.path.abspath(args.dir)
         for filename in os.listdir(root):
@@ -85,7 +89,10 @@ def main():
             if os.path.isdir(path):
                 continue
 
-            create_mask(path)
+            try:
+                create_mask(path)
+            except Exception as e:
+                print(f"Failed to process {path}. Reason: {e}")
 
 if __name__ == "__main__":
     main()
