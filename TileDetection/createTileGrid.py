@@ -19,6 +19,7 @@ class Tile:
         self.center = ((vertex2[0]+vertex1[0])//2, (vertex2[1]+vertex1[1])//2)
         self.area = (vertex2[0]-vertex1[0])*(vertex2[1]-vertex1[1])
         self.neighbors = set()
+        self.vertices = []
 
     def __str__(self):
         return f"Tile(vertex1={self.vertex1}, vertex2={self.vertex2}, center={self.center}, area={self.area})"
@@ -53,13 +54,29 @@ def main():
 
     tiles.sort(key = lambda x: (x.center[1], x.center[0]))
     meanWidth = np.mean([tile.boxWidth for tile in tiles])
-    print(meanWidth)
     for i in range(len(tiles)):
         for j in range(i+1, len(tiles)):
-            if math.dist(tiles[i].center, tiles[j].center) <= 1.35*meanWidth:
+            if math.dist(tiles[i].center, tiles[j].center) <= 1.35*meanWidth: # add neighbors to list
                 tiles[i].neighbors.add(j)
                 tiles[j].neighbors.add(i)
-        image = cv2.rectangle(image, (tiles[i].vertex1[0], tiles[i].vertex1[1]), (tiles[i].vertex2[0], tiles[i].vertex2[1]), (36,255,12), 2)
+    
+    for i in range(len(tiles)): # deduce vertices of hexagonal tiles
+        neighbor = tiles[list(tiles[i].neighbors)[0]]
+
+        # cos(30) = apothem/radius
+        apothem = math.ceil(math.dist(tiles[i].center, neighbor.center))/2
+        radius = apothem / 0.866025
+        angleIncrement = 1.047197 # 2*PI/6
+        angle = math.atan2(neighbor.center[1] - tiles[i].center[1], neighbor.center[0] - tiles[i].center[0])
+        for _ in range(6):
+            angle += angleIncrement
+            tiles[i].vertices.append([tiles[i].center[0] + radius * math.sin(angle), tiles[i].center[1] + radius * math.cos(angle)])
+        pts = np.array(tiles[i].vertices, np.int32)
+        pts = pts.reshape((-1, 1, 2))
+        cv2.polylines(image, [pts], True, (36,255,12), 2)
+
+        # debug: draw bounding box and show number of neighbors
+        # image = cv2.rectangle(image, (tiles[i].vertex1[0], tiles[i].vertex1[1]), (tiles[i].vertex2[0], tiles[i].vertex2[1]), (36,255,12), 2)
         cv2.putText(image, f"{len(tiles[i].neighbors)}", (tiles[i].center[0], tiles[i].center[1]), cv2.FONT_HERSHEY_SIMPLEX, 2, (36,255,12), 3)
 
     cv2.imshow("detection", cv2.resize(image, None, fx=.25, fy=.25))
