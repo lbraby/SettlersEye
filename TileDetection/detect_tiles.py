@@ -18,7 +18,6 @@ def build_parser():
 def main():
     parser = build_parser()
     args = parser.parse_args()
-    print(args)
     model = YOLO('yolov8m_tiledetection.pt')
 
     results = model.predict(args.image, imgsz=args.image_size, conf=args.confidence)[0]
@@ -27,8 +26,15 @@ def main():
     
     image = cv2.imread(args.image)
     for i in range(min(len(boxes), 19)): # detect at most 19 tiles
-        image = cv2.rectangle(image, (boxes[i][0], boxes[i][1]), (boxes[i][2], boxes[i][3]), (36,255,12), 1)
-        cv2.putText(image, "Tile", (boxes[i][0], boxes[i][1]-5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (36,255,12), 1)
+        ## show each tile as individual image (comment out final 2 lines of this loop if you want to use)
+        snippet = image[boxes[i][1]:boxes[i][3], boxes[i][0]:boxes[i][2]]
+        cv2.imshow("detection", cv2.resize(snippet, None, fx=2, fy=2))
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+
+        # draw bounding boxes
+        # image = cv2.rectangle(image, (boxes[i][0], boxes[i][1]), (boxes[i][2], boxes[i][3]), (36,255,12), 1)
+        # cv2.putText(image, "Tile", (boxes[i][0], boxes[i][1]-5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (36,255,12), 1)
 
     cv2.imshow("detection", image)
     cv2.waitKey(0)
