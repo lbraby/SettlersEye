@@ -90,7 +90,7 @@ Basically, the model works by splitting the figure into a grid and making a pred
 - Matthew Carbonaro: YOLO research/overview and game piece detection. Environment creation and first model training attempt.
 - Luke Braby: traditional FEX techniques and tile game piece YOLO model
 
-## Part 4:
+## Part 4 (In progress):
 #### Synthetic Data Generation
 ```
 # Be in SettlersEye base directory
