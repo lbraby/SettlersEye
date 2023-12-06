@@ -17,7 +17,7 @@ def place_piece(img: np.array, piece: np.array, location: tuple, scaling_factor:
     piece = piece.copy()
     piece = cv2.resize(piece, (int(piece.shape[1] * scaling_factor), int(piece.shape[0] * scaling_factor)))
 
-    piece = ndimage.rotate(piece, 23)
+    piece = ndimage.rotate(piece, random.randrange(0, 360))
 
     y1, y2 = location[1] - math.ceil(piece.shape[0] / 2), location[1] + math.floor(piece.shape[0] / 2)
     x1, x2 = location[0] - math.ceil(piece.shape[1] / 2), location[0] + math.floor(piece.shape[1] / 2)
@@ -53,7 +53,7 @@ def generate_data(background: np.array, images: str, n_images: int, start: int =
             x = random.randrange(piece.shape[1]//2, syn_img.shape[1] - piece.shape[1]//2)
             y = random.randrange(piece.shape[0]//2, syn_img.shape[0] - piece.shape[0]//2)
 
-            syn_img, bbox = place_piece(syn_img, piece, (x, y), .25)
+            syn_img, bbox = place_piece(syn_img, piece, (x, y), random.randint(15, 31)/100)
 
             annotation = {"label": get_label(piece_path),
                           "coordinates": bbox
@@ -61,8 +61,9 @@ def generate_data(background: np.array, images: str, n_images: int, start: int =
 
             annotations["annotations"].append(annotation)
 
-        cv2.imwrite(os.path.join(output_base, f"../synthetic_images/synth{i}.png"), syn_img)
-        with open(os.path.join(output_base, f"../synthetic_images/synth{i}.json"), "w") as json_file:
+        os.makedirs(os.path.join(output_base, "./synthetic_images"), exist_ok=True)
+        cv2.imwrite(os.path.join(output_base, f"./synthetic_images/synth{i}.png"), syn_img)
+        with open(os.path.join(output_base, f"./synthetic_images/synth{i}.json"), "w") as json_file:
             json.dump([annotations], json_file)
 
 
@@ -99,7 +100,7 @@ def main():
     if args.out:
         output_base = args.out
     else:
-        output_base = os.path.dirname(__file__)
+        output_base = os.path.join(os.path.dirname(__file__), "..")
 
     generate_data(syn_img, images, args.num, args.start, output_base)
 
