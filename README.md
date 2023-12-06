@@ -89,3 +89,16 @@ Basically, the model works by splitting the figure into a grid and making a pred
 ### Contributions of Each Team Member:
 - Matthew Carbonaro: YOLO research/overview and game piece detection. Environment creation and first model training attempt.
 - Luke Braby: traditional FEX techniques and tile game piece YOLO model
+
+## Part 4:
+#### Synthetic Data Generation
+```
+# Be in SettlersEye base directory
+./synthesis/create_masks.py --dir synthetic_seed/blue -o output -c # Generate and crop masks for each piece type
+./synthesis/create_masks.py --dir synthetic_seed/orange -o output -c
+./synthesis/create_masks.py --dir synthetic_seed/white -o output -c
+./synthesis/create_masks.py --dir synthetic_seed/red -o output -c
+
+ # Generate 50 synthetic images as well as annotations. Should find them in "synthetic_images" directory in SettlersEye
+./synthesis/generate_data.py -b synthetic_seed/boards/board1.jpg -d output -n 50
+```
