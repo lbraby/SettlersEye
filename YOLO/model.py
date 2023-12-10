@@ -8,9 +8,9 @@ import cv2
 def build_parser():
     parser = argparse.ArgumentParser(description="Python wrapper to run YOLOv8 model on images")
     parser.add_argument("--image", help="Image to classify", required=True)
-    parser.add_argument("--model", help="Model used in YOLO detection", default="med_model.pt")
-    parser.add_argument("--image_size", help="Specify image size", required=False, default=640)
-    parser.add_argument("--confidence", help="Specify image size", required=False, default=.35)
+    parser.add_argument("--model", help="Model used in YOLO detection", default="synthetic_model.pt")
+    parser.add_argument("--image_size", help="Specify image size", type=int, required=False, default=640)
+    parser.add_argument("--confidence", help="Specify image size", type=float, required=False, default=.55)
 
     return parser
 
@@ -29,6 +29,7 @@ def main():
     frame = box_annotator.annotate(scene=results.orig_img, detections=detections)
     print(results)
     print(results.boxes)
+    frame = cv2.resize(frame, (640, 640))
     cv2.imshow("Annotated Board", frame)
     cv2.waitKey(0)
 
