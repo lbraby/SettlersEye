@@ -5,6 +5,7 @@ import argparse
 import cv2
 import math
 import numpy as np
+from YOLO.model import tabulate_pieces
 
 # train model: yolo task=detect mode=train epochs=20 data=C:\Users\lbrab\OneDrive\Documents\Programming\ComputerVisionFA23\SettlersEye\TileDetection\data\data.yaml model=yolov8m.pt imgsz=640
 
