@@ -92,8 +92,11 @@ Basically, the model works by splitting the figure into a grid and making a pred
 
 ## Part 4 (In progress):
 #### Synthetic Data Generation
+To generate synthetic data for training purposes, we first took images of each piece at a few different rotations from a top-down angle. We then created segmentation masks of each image which creates a mask we will use later to mask out the background of the piece images. We additionally took some photos of empty boards which we will place pieces onto. After we had the segmentation masks, we used openCV to mask away the background, make the background transparent, and crop the images so they were the size of the piece, saving them as a png. This cropping makes it simple to use the image size for the bounding boxes in the synthetic images later. Once we had the cropped piece images, we then picked images at random and used the alpha channel to only put the piece on the background that we chose. To improve training reliability, we multiplied the size by a random factor as well as applied a random rotation to the piece before we placed it. We then used the image size as a bounding box, taking into account the rotation and scaling factor, and saved that as a json file that accompanied the synthetic image that was created. Each image has 10 and 60 pieces placed on the board. Once we had those images and the labels, we uploaded it to our roboflow project to combine the images with out real dataset and downloaded the total dataset in the YOLOv8 format. We then trained a new model called `synthetic_model.py` that is stored in the top-level directory.
+
+##### Example of how to generate data
 ```
-# Be in SettlersEye base directory
+# Be in SettlersEye base directory and have activated our conda environment
 ./synthesis/create_masks.py --dir synthetic_seed/blue -o output -c # Generate and crop masks for each piece type
 ./synthesis/create_masks.py --dir synthetic_seed/orange -o output -c
 ./synthesis/create_masks.py --dir synthetic_seed/white -o output -c
@@ -102,3 +105,10 @@ Basically, the model works by splitting the figure into a grid and making a pred
  # Generate 50 synthetic images as well as annotations. Should find them in "synthetic_images" directory in SettlersEye
 ./synthesis/generate_data.py -b synthetic_seed/boards/board1.jpg -d output -n 50
 ```
+
+#### Board graph construction
+To create the graph from the tile detection model we trained for part 3, we had to do some simple geometry to work backward from hexagons to a graph. First, we take the center point of each detection and calculate the number of neighbor tiles surrounding each tile. Using these neighbors, we can use the distance between centers to find the radius of each tile hexagon. Then you can rotate that point around the center of the tile to get the vertex points for each tile. It should be noted that this only works for top-down photos because we assume the radius is constant, which is not the case for isometric photos. Once you have all of the points for each tile, you can coalesce points close to each other to create your final board graph. To get the graph for the roads, we took the board graph and made the vertices the points the midpoint between each vertex in the board graph. This tells us about where roads should roughly be to map piece detections to the road graph. Each vertex on the road graph connects to the points that are within 1.5 times the tile's radius that it is connected to. 
+
+### Contributions of Each Team Member:
+- Matthew Carbonaro: Synthetic data generation and model training.
+- Luke Braby:  graph construction using geometry.
