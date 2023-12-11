@@ -34,7 +34,6 @@ def tabulate_pieces(m_result: results):
     translation = m_result.names
     box_results = m_result.boxes
     bboxes = []
-    print(box_results)
 
     scores: Dict[str, Dict[str, List[List[float]]]] = defaultdict(lambda: defaultdict(list))
 
