@@ -6,14 +6,14 @@ import argparse
 from supervision import Detections, BoxAnnotator, ColorPalette
 import cv2
 from collections import defaultdict
-from typing import Dict
+from typing import Dict, Tuple, List
 
 def build_parser():
     parser = argparse.ArgumentParser(description="Python wrapper to run YOLOv8 model on images")
     parser.add_argument("--image", help="Image to classify", required=True)
     parser.add_argument("--model", help="Model used in YOLO detection", default="synthetic_model.pt")
     parser.add_argument("--image_size", help="Specify image size", type=int, required=False, default=640)
-    parser.add_argument("--confidence", help="Specify image size", type=float, required=False, default=.55)
+    parser.add_argument("--confidence", help="Specify image size", type=float, required=False, default=.4)
 
     return parser
 
@@ -36,7 +36,7 @@ def tabulate_pieces(m_result: results):
     bboxes = []
     print(box_results)
 
-    scores: Dict[str, Dict[str, int]] = defaultdict(lambda: defaultdict(int))
+    scores: Dict[str, Dict[str, List[List[float]]]] = defaultdict(lambda: defaultdict(list))
 
     for index, identification in enumerate(box_results.cls.numpy().astype(int)):
         color, piece = translation[identification].split("-")
@@ -46,7 +46,7 @@ def tabulate_pieces(m_result: results):
         else:
             bboxes.append(box_results.xyxy[index])
 
-        scores[color][piece] += 1
+        scores[color][piece].append(box_results.xywh[index][:2])
 
     return scores
 
