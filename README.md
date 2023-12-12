@@ -156,6 +156,21 @@ python3 catanScorer.py --image imagePath --players playercode
 # example call for game with orange, white, and blue:
 python3 catanScorer.py --image .\part5_testing\test6.jpg --players owb
 ```
-### Description of Test Database
+### Description of Test Database and Accuracies
 The test data, similar to our training and validation data, was captured by us since there is not a good source of Catan game images on the internet. It is made up of 7 images (compared to our 29 training and validation images for tile detection). Most of these images differ from our training and validation subsets because they are taken from overhead instead of from an angle. There is one image where the full board is not in view to prove that our algorithm catches this invalid image early (which is does).  
-Using the 95% confidence threshold for tiles, 100% of tiles were detected without false positives. For the test images roads are correctly detected 80% of the time, settlements are detected correctly 73% of the time, and cities are detected correctly 78% of the time. When roads are not detected, it greatly affects total points since a player can be wrongly given 2 additional points when they do not have the longest road. Additionally, when settlements are wrongly detected as cities, players are awarded 1 additional point which is wrong. And when settlements and cities are not detected, players simply miss out on points. It should be noted that certain colors (primarily orange) perform worse than other colors (e.g. red which performs the best). 
+Using the 95% confidence threshold for tiles, 100% of tiles were detected without false positives. For the test images roads are correctly detected 80% of the time, settlements are detected correctly 73% of the time, and cities are detected correctly 78% of the time. When roads are not detected, it greatly affects total points since a player can be wrongly given 2 additional points when they do not have the longest road. Additionally, when settlements are wrongly detected as cities, players are awarded 1 additional point which is wrong. And when settlements and cities are not detected, players simply miss out on points. It should be noted that certain colors (primarily orange) perform worse than other colors (e.g. red which performs the best). Since errors are caused by pieces being incorrectly detected or by images being taken at an angle, the error rates could be fixed by improving the success rate of piece detection YOLO model. Since SettlersEye explicitly requests that images be taken from above, the erros cause by images being taken at an angle are not as grave.
+### Reflecting on Test Results
+In reflecting on how the test images performed, we will take a look at three examples representing [the Good, the Bad, and the Ugly](https://www.youtube.com/watch?v=IFNUGzCOQoI). 
+#### The Good: test3.jpg
+![The Good Output](part5_testing/test3_output.png)  
+Though the output from test 3 does not do well at identifying orange pieces (2 points are awarded when 8 are expected), it identifies each blue road correctly (correctly awarding it longest road), gives red the correct number of points, and is only 1 point off for blue and white. This good case shows that a better piece detector YOLO model is needed (especially for orange) but that our model works well for overhead images in good lighting.
+#### The Bad: test2.jpg
+![The Bad Output](part5_testing/test2_output.png)  
+Test 2 is an excellent example that shows how our project is able to determine if a full board is in view and if a complete grid can be constructed from the image that includes 19 hexagonal tiles. For this test, an error message is printed describing to the user that the full board could not be detected. For another bad example, look at test5.jpg. It fails since the image is not taken from straight on above. Our handcrafted solution cannot create a hexagonal grid from this input which is expected.
+#### The Ugly: test4.jpg
+![The Ugly Output](part5_testing/test4_output.png)  
+Test 4 is a very surprising test example. One would expect it to work since it is it is an overhead image of the board but it fails to construct a graph of 19 tiles and 54 vertices since the vertices are too far from eachother to be consolidated into single points. We believe that it fails because while it appears to be overhead, it is in actuality taken from a tilt (see how the leftmost tiles are much larger than those on the right).
+
+### Contributions of Each Team Member:
+- Matthew Carbonaro: piece detection, overlap rejection, sorting pieces by color
+- Luke Braby: longest road algorithm, checking pieces on board, score calculation
