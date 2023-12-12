@@ -3,7 +3,6 @@
 from ultralytics import YOLO
 from ultralytics.engine import results
 import argparse
-from supervision import Detections, BoxAnnotator, ColorPalette
 import cv2
 from collections import defaultdict
 from typing import Dict, Tuple, List
@@ -55,14 +54,14 @@ def main():
     parser = build_parser()
     args = parser.parse_args()
     model = YOLO(args.model)
-    box_annotator = BoxAnnotator(color=ColorPalette.default(), thickness=4, text_thickness=4, text_scale=2)
+    # box_annotator = BoxAnnotator(color=ColorPalette.default(), thickness=4, text_thickness=4, text_scale=2)
     results = model.predict(args.image, imgsz=args.image_size, conf=args.confidence)[0]
-    detections = Detections(xyxy=results.boxes.xyxy.cpu().numpy(),
-                            confidence=results.boxes.conf.cpu().numpy(),
-                            class_id=results.boxes.cls.cpu().numpy().astype(int)
-                            )
+    # detections = Detections(xyxy=results.boxes.xyxy.cpu().numpy(),
+    #                         confidence=results.boxes.conf.cpu().numpy(),
+    #                         class_id=results.boxes.cls.cpu().numpy().astype(int)
+    #                         )
 
-    frame = box_annotator.annotate(scene=results.orig_img, detections=detections)
+    # frame = box_annotator.annotate(scene=results.orig_img, detections=detections)
     frame = cv2.resize(frame, (640, 640))
     scores = tabulate_pieces(results)
     print(scores)

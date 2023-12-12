@@ -43,6 +43,7 @@ def build_parser():
     parser.add_argument("--image", help="Image to classify", required=True)
     parser.add_argument("--image_size", help="Specify image size", required=False, default=640)
     parser.add_argument("--confidence", help="Specify image size", required=False, default=.90)
+    parser.add_argument("--players", help="Specify players present (b for blue, r for red, o for orange, w for white) (ed: ow)", required=True)
 
     return parser
 
@@ -55,8 +56,6 @@ def main():
     # run tile detector
     tiles = []
     results = model.predict(args.image, imgsz=args.image_size, conf=args.confidence)[0]
-    print(results.boxes.cls)
-    print(results.names)
     boxes = [(math.floor(box[0]), math.floor(box[1]), math.ceil(box[2]), math.ceil(box[3])) for box in results.boxes.xyxy.cpu().numpy()]
     if len(boxes) < 19:
         print("Error: failed to detect full catan board (detected fewer than 19 game tiles)\n")
@@ -130,7 +129,6 @@ def main():
     height, width, _= image_w_roads.shape
     for tileEdge in board_E:
         roads_V.append(((tileEdge[0][0]+tileEdge[1][0])//2, (tileEdge[0][1]+tileEdge[1][1])//2))
-        image_w_roads = cv2.circle(image_w_roads, roads_V[-1], radius=0, color=(0,0,255), thickness=10)
 
     roads_Adjacency = dict()
     for i in range(len(roads_V)):
@@ -148,15 +146,123 @@ def main():
         for v2 in roads_Adjacency[v1]:
             image_w_roads = cv2.line(image_w_roads, v1, v2, (0,255,0), height//500)
 
-    # detect roads
-    blue_roads = set()
-    orange_roads = set()
-    red_roads = set()
-    white_roads = set()
+    # detect roads and pieces
+    model = YOLO("med_model.pt")
+    results = model.predict(args.image, imgsz=args.image_size, conf=.4)[0]
+    scores = tabulate_pieces(results)
+
+    player_points = {}
+    longest = 0
+    longest_road_recipients = []
+    if "b" in args.players:
+        points, longest_path, detected_roads = score_player(scores["blue"], board_V, roads_V, roads_Adjacency, radius)
+        for road in detected_roads:
+            image_w_roads = cv2.circle(image_w_roads, road, radius=0, color=(255, 0, 0), thickness=height//50)
+        player_points["blue"] = points
+        if longest_path == longest:
+            longest_road_recipients.append("blue")
+        elif longest_path > longest:
+            longest_road_recipients = ["blue"]
+            longest = longest_path
+
+    if "r" in args.players:
+        points, longest_path, detected_roads = score_player(scores["red"], board_V, roads_V, roads_Adjacency, radius)
+        for road in detected_roads:
+            image_w_roads = cv2.circle(image_w_roads, road, radius=0, color=(0, 0, 255), thickness=height//50)
+        player_points["red"] = points
+        if longest_path == longest:
+            longest_road_recipients.append("red")
+        elif longest_path > longest:
+            longest_road_recipients = ["red"]
+            longest = longest_path
+
+    if "o" in args.players:
+        points, longest_path, detected_roads = score_player(scores["orange"], board_V, roads_V, roads_Adjacency, radius)
+        for road in detected_roads:
+            image_w_roads = cv2.circle(image_w_roads, road, radius=0, color=(0, 165, 255), thickness=height//50)
+        player_points["orange"] = points
+        if longest_path == longest:
+            longest_road_recipients.append("orange")
+        elif longest_path > longest:
+            longest_road_recipients = ["orange"]
+            longest = longest_path
+
+    if "w" in args.players:
+        points, longest_path, detected_roads = score_player(scores["white"], board_V, roads_V, roads_Adjacency, radius)
+        for road in detected_roads:
+            image_w_roads = cv2.circle(image_w_roads, road, radius=0, color=(255, 255, 255), thickness=height//50)
+        player_points["white"] = points
+        if longest_path == longest:
+            longest_road_recipients.append("white")
+        elif longest_path > longest:
+            longest_road_recipients = ["white"]
+            longest = longest_path
+
+    print("\n#################################### SETTLERS EYE ####################################")
+    print("# LONGEST ROAD:")
+    if len(longest_road_recipients) == 1:
+        player_points[longest_road_recipients[0]] += 2
+        print(f"#  - Longest road was awarded to {longest_road_recipients[0]}.")
+        print(f"#  - The points below reflect {longest_road_recipients[0]} receiving longest road.")
+    elif len(longest_road_recipients) > 1:
+        print(f"#  - The following players tied for longest road: {', '.join(longest_road_recipients)}.")
+        print(f"#  - 2 additional points should be awarded to the player who reached length {longest} road path first.")
+    print("# POINT SUMMARY:")
+    for color in player_points:
+        print(f"#  - {color}: {player_points[color]} points")
+    print("# LARGEST ARMY:")
+    print("#  - Award two additional points to the player with the largest army")
+    print("######################################################################################")
+
 
     cv2.imshow("road graph", cv2.resize(image_w_roads, (500, int(height/(width/500)))))
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+
+def score_player(detections, board_V, roads_V, roads_Adjacency, radius):
+    points = 0
+    for settlement in detections["settlement"]:
+        for v in board_V:
+            if math.dist(settlement, v) < radius * .4:
+                points += 1
+                break
+    for city in detections["city"]:
+        for v in board_V:
+            if math.dist(city, v) < radius * .4:
+                points += 2
+                break
+
+    detected_roads = set()
+    for road in detections["road"]:
+        for v in roads_V:
+            if math.dist(road, v) < radius * .4:
+                detected_roads.add(v)
+                break
+    
+    longest_path = 0
+    for road in detected_roads:
+        path_len = longest_road(road, roads_Adjacency, detected_roads, 1, {road})
+        if path_len > longest_path:
+            longest_path = path_len
+    
+    return points, longest_path, detected_roads
+
+
+def longest_road(curr, roads_Adjacency, detected_roads, length, visited):
+    longest = length
+    for road in roads_Adjacency[curr]:
+        if road in visited:
+            continue
+        if road in detected_roads:
+            new_visited = visited.copy()
+            new_visited.add(road)
+            path_len = longest_road(road, roads_Adjacency, detected_roads, length+1, new_visited)
+            if path_len > longest:
+                longest = path_len
+    
+    return longest
+
+
 
 if __name__ == "__main__":
     main()
