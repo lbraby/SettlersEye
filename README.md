@@ -111,6 +111,12 @@ To create a usable graph from the hexagonal tiles detected from the YOLO model t
 This paragraph will explain how the graphs used for scoring the game are created. You may also look at TileDetection/createTileGrid.py for the steps below in code form. After detecting tiles using a 95% confidence threshold, make sure that we have 19 tiles detected. Next we locate the neighbors of each tile by finding the tiles that are adjacent to each tile. Then, we use our geometry knowledge to deduce the 6 vertices of each detected tile. By looking at a tile's neighbor, we can set the apothem equal to the distance between the tile and it's neighbor divided by two. The radius of the hexagon can be found by dividing the apothem by cos(30). Using the radius, the angle that the apothem is at, and the centerpoint we can find the 6 vertices with a few simple rotations. Now that we have the vertices, we can merge vertices that are close to eachother into a single vertex so that our graph is connected. With the vertices of our graph known, we can find the edges by looping through all the vertices and pairing vertices whose distance between themselves is equal to the average edge length of our hexagons' sides (with some leway). This graph where the vertices represent tile vertices and the edges are tile edges will be used to validate that settlements and cities are properly placed on the board when they are detected and to make another graph for longest road calculations.  
 To make the graph for longest road, vertices are the centerpoins of tile edges and edges are drawn where the distances between these centerpoints is equal to the average edge length of our hexagons' sides (with some leway). This graph is represented by an adjacency list for the sake of the longest road algorithm.
 
+##### Example of how to create tile grids
+```
+# Be in TileDetection directory and have conda env activated
+python3 .\createTileGrid.py --image .\white_orange_game.jpg
+```
+
 ### Contributions of Each Team Member:
 - Matthew Carbonaro: Synthetic data generation and model training.
 - Luke Braby:  board graph and road graph contruction using detected roads and geommetry
