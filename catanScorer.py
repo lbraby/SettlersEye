@@ -103,7 +103,7 @@ def main():
                     vertex1 = tiles[i].vertices[k]
                     vertex2 = tiles[j].vertices[l]
                     dist = int(math.dist(vertex1, vertex2))
-                    if dist <= radius * .2:
+                    if dist <= radius * .3:
                         tiles[j].vertices[l] = tiles[i].vertices[k]
 
     # verify that board consists of exactly 54 vertices
@@ -113,6 +113,8 @@ def main():
             vertices.add(vertex)
     if (len(vertices) != 54):
         print(f"Error: failed to detect full catan board ({len(vertices)} vertices detected when 54 expected)\n")
+        # for v in vertices:
+        #     print(v)
         return
     
     # create graph where edges are tile edges and vertices are tile vertices (used for validating placement of pieces)

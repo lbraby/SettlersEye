@@ -126,3 +126,36 @@ python3 .\createTileGrid.py --image .\white_orange_game.jpg
 ### Contributions of Each Team Member:
 - Matthew Carbonaro: Synthetic data generation and model training.
 - Luke Braby:  board graph and road graph contruction using detected roads and geommetry
+
+## Part 5:
+### Game Scoring
+The final script for this assignment that scores a Catan game given an overhead image of a complete game board is catanScorer.py. This section will continue where part 4 left off for how the game is scored by our end product but catanScorer.py can be consulted for a code version of the steps described below.  
+After creating a board graph, we can assign points to each user using our trained piece detector YOLO model. For each color, we find the number of settlements detected that are within an edge length from a board vertex (this shows that it is actually placed on the board). For each of those, a player gets 1 point. Then find the number of cities that are within an edge length from a board vertex and for each one add 2 points to a player's score.  
+Now that we have each of our players' base point count, we will find which player has the longest road using our road graph where each vertex is the centerpoint of a tile edge and each edge in the graph is a pair of those vertices that are within roughly a tile edge length from eachother. We then run an NP longest road algorithm for each road color and award 2 extra points to the user with the longest road path.  
+Final game scores are outputted in the format of the following example:
+```
+#################################### SETTLERS EYE ####################################  
+# LONGEST ROAD:  
+#  - Longest road was awarded to blue.  
+#  - The points below reflect blue receiving longest road.  
+# POINT SUMMARY:  
+#  - blue: 10 points  
+#  - orange: 4 points  
+#  - white: 7 points  
+# LARGEST ARMY:  
+#  - Award two additional points to the player with the largest army  
+######################################################################################  
+```
+To run the game scorer script:
+```
+# Be in SettlersEye base directory and have conda environment activated
+python3 catanScorer.py --image imagePath --players playercode
+# imagePath is path of image you want to run catanScorer.py on
+# playerCode is string where the inclusion of certain characters means a certain player is in the game ('o' for orange, 'w' for white, 'r' for red, 'b' for blue)
+
+# example call for game with orange, white, and blue:
+python3 catanScorer.py --image .\part5_testing\test6.jpg --players owb
+```
+### Description of Test Database
+The test data, similar to our training and validation data, was captured by us since there is not a good source of Catan game images on the internet. It is made up of 7 images (compared to our 29 training and validation images for tile detection). Most of these images differ from our training and validation subsets because they are taken from overhead instead of from an angle. There is one image where the full board is not in view to prove that our algorithm catches this invalid image early (which is does).  
+Using the 95% confidence threshold for tiles, 100% of tiles were detected without false positives. For the test images roads are correctly detected 80% of the time, settlements are detected correctly 73% of the time, and cities are detected correctly 78% of the time. When roads are not detected, it greatly affects total points since a player can be wrongly given 2 additional points when they do not have the longest road. Additionally, when settlements are wrongly detected as cities, players are awarded 1 additional point which is wrong. And when settlements and cities are not detected, players simply miss out on points. It should be noted that certain colors (primarily orange) perform worse than other colors (e.g. red which performs the best). 
