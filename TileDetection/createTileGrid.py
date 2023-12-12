@@ -54,8 +54,6 @@ def main():
     # run tile detector
     tiles = []
     results = model.predict(args.image, imgsz=args.image_size, conf=args.confidence)[0]
-    print(results.boxes.cls)
-    print(results.names)
     boxes = [(math.floor(box[0]), math.floor(box[1]), math.ceil(box[2]), math.ceil(box[3])) for box in results.boxes.xyxy.cpu().numpy()]
     if len(boxes) < 19:
         print("Error: failed to detect full catan board (detected fewer than 19 game tiles)\n")
@@ -63,11 +61,12 @@ def main():
     for i in range(min(len(boxes), 19)): # detect at most 19 tiles
         tiles.append(Tile((boxes[i][0], boxes[i][1]), (boxes[i][2], boxes[i][3])))
 
+    # for each tile, find neighbors
     tiles.sort(key = lambda x: (x.center[1], x.center[0]))
     meanWidth = np.mean([tile.boxWidth for tile in tiles])
     for i in range(len(tiles)):
         for j in range(i+1, len(tiles)):
-            if math.dist(tiles[i].center, tiles[j].center) <= 1.35*meanWidth: # add neighbors to list
+            if math.dist(tiles[i].center, tiles[j].center) <= 1.35*meanWidth:
                 tiles[i].neighbors.add(j)
                 tiles[j].neighbors.add(i)
     
