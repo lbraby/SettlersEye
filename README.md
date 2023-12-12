@@ -174,3 +174,6 @@ Test 4 is a very surprising test example. One would expect it to work since it i
 ### Contributions of Each Team Member:
 - Matthew Carbonaro: piece detection, overlap rejection, sorting pieces by color
 - Luke Braby: longest road algorithm, checking pieces on board, score calculation
+
+## Final Video
+Link: https://drive.google.com/file/d/14DN98bHvEs6lWyK5QNdIIi3KO0Cv7r_3/view?usp=drive_link
